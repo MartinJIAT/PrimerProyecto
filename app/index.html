@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Panel IoT - DHT22</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <script defer src="/app/main.js"></script>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo">
+      <img src="https://electronicagambino.com/wp-content/uploads/2023/05/cropped-Electronica-Gambino-e1684335474114.png" alt="Logo"/>
+    </div>
+    <div class="toggle-container">
+      <input type="checkbox" id="theme-toggle" />
+      <label for="theme-toggle" class="toggle-label">
+        <span class="icon-moon">🌙</span>
+        <span class="icon-sun">☀️</span>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+  </nav>
+
+  <main class="dashboard">
+    <h1>Panel IoT - Sensor DHT22</h1>
+    <div class="data-box">
+      <h2>Temperatura</h2>
+      <p id="temp">-- °C</p>
+    </div>
+    <div class="data-box">
+      <h2>Humedad</h2>
+      <p id="humidity">-- %</p>
+    </div>
+  </main>
+</body>
+</html>
