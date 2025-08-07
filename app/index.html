@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel IoT - DHT22</title>
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="main.js"></script>
+</head>
+<body>
+  <nav class="navbar">
+    <img src="https://www.nintenderos.com/wp-content/uploads/2023/07/giovanni-Pokemon-GO.jpg" alt="Logo Giovanni" class="logo" />
+    <div class="toggle-container">
+      <input type="checkbox" id="themeToggle" />
+      <label for="themeToggle" class="toggle">
+        <span class="icon-sun">☀️</span>
+        <span class="icon-moon">🌙</span>
+      </label>
+    </div>
+  </nav>
+
+  <main>
+    <h1>Panel IoT - Sensor DHT22</h1>
+    <div class="card-container">
+      <div class="card">
+        <h2>Temperatura</h2>
+        <p id="tempValue">-- °C</p>
+      </div>
+      <div class="card">
+        <h2>Humedad</h2>
+        <p id="humValue">-- %</p>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
