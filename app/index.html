@@ -4,12 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Panel IoT - DHT22</title>
-  <link rel="stylesheet" href="style.css" />
-  <script defer src="main.js"></script>
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="script.js"></script>
 </head>
 <body>
+  <!-- Barra de navegación -->
   <nav class="navbar">
-    <img src="https://www.nintenderos.com/wp-content/uploads/2023/07/giovanni-Pokemon-GO.jpg" alt="Logo Giovanni" class="logo" />
+    <img src="https://www.nintenderos.com/wp-content/uploads/2023/07/giovanni-Pokemon-GO.jpg" 
+         alt="Logo Giovanni" 
+         class="logo" />
     <div class="toggle-container">
       <input type="checkbox" id="themeToggle" />
       <label for="themeToggle" class="toggle">
@@ -19,6 +22,7 @@
     </div>
   </nav>
 
+  <!-- Contenido principal -->
   <main>
     <h1>Panel IoT - Sensor DHT22</h1>
     <div class="card-container">
@@ -32,5 +36,22 @@
       </div>
     </div>
   </main>
+
+  <!-- Script para manejar datos y tema -->
+  <script>
+    // Simulación de datos (aquí conectarías con tu backend o MQTT)
+    setInterval(() => {
+      document.getElementById("tempValue").textContent = (20 + Math.random() * 5).toFixed(1) + " °C";
+      document.getElementById("humValue").textContent = (40 + Math.random() * 10).toFixed(1) + " %";
+    }, 2000);
+
+    // Modo oscuro / claro
+    const themeToggle = document.getElementById("themeToggle");
+    themeToggle.addEventListener("change", () => {
+      document.body.classList.toggle("dark", themeToggle.checked);
+    });
+  </script>
 </body>
 </html>
+
+
