@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Monitoreo DHT22 - ESP32</title>
+
+  <link rel="stylesheet" href="/styles.css">
+
+  <!-- SweetAlert2 & Chart.js desde CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-left">
+      <div class="logo">
+        <!-- Simple logo SVG -->
+        <svg width="36" height="36" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" fill="currentColor" />
+          <text x="12" y="16" font-size="10" text-anchor="middle" fill="#fff">ESP</text>
+        </svg>
+        <span class="brand">ESP32 DHT22</span>
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <div class="toggle-group">
+        <button id="themeToggle" class="icon-btn" title="Modo oscuro/claro" aria-label="Toggle theme">
+          <!-- Moon / Sun icons toggled with CSS -->
+          <svg class="icon moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+          <svg class="icon sun" viewBox="0 0 24 24"><path d="M6.76 4.84l-1.8-1.79L3.17 4.84 4.96 6.63 6.76 4.84zM1 13h3v-2H1v2zm10 9h2v-3h-2v3zM17.24 4.84l1.79-1.79 1.79 1.79-1.79 1.79-1.79-1.79zM20 11v2h3v-2h-3zM6.76 19.16l-1.8 1.79-1.79-1.79 1.79-1.79 1.8 1.79zM17.24 19.16l1.79 1.79 1.79-1.79-1.79-1.79-1.79 1.79zM12 6a6 6 0 100 12 6 6 0 000-12z"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <section class="card grid">
+      <div class="sensor">
+        <div class="reading temp">
+          <div class="icon-wrap" aria-hidden="true">
+            <!-- Temp icon -->
+            <svg viewBox="0 0 24 24"><path d="M14 14.76V5a2 2 0 10-4 0v9.76A4 4 0 1014 14.76z"/></svg>
+          </div>
+          <div>
+            <div class="label">Temperatura</div>
+            <div id="tempValue" class="value">-- °C</div>
+          </div>
+        </div>
+
+        <div class="reading hum">
+          <div class="icon-wrap" aria-hidden="true">
+            <!-- Humidity icon -->
+            <svg viewBox="0 0 24 24"><path d="M12 3s-6 6.5-6 10a6 6 0 0012 0c0-3.5-6-10-6-10z"/></svg>
+          </div>
+          <div>
+            <div class="label">Humedad</div>
+            <div id="humValue" class="value">-- %</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="row">
+          <button id="refreshBtn" class="btn">Actualizar</button>
+          <button id="showChart" class="btn outline">
+            <!-- chart icon -->
+            <svg class="small" viewBox="0 0 24 24"><path d="M3 3v18h18"/></svg>
+            Ver gráficos
+          </button>
+        </div>
+
+        <div class="row">
+          <label for="hoursBack">Historial (horas):</label>
+          <input id="hoursBack" type="number" min="1" max="720" value="168" />
+          <label for="step">Paso (min):</label>
+          <input id="step" type="number" min="1" max="1440" value="60" />
+        </div>
+
+        <div class="row small">
+          <em>Última actualización: <span id="lastUpdate">-</span></em>
+        </div>
+      </div>
+    </section>
+
+    <section class="card info">
+      <h3>Conexión</h3>
+      <p>IP del dispositivo: <span id="deviceIp">--</span></p>
+      <p>API disponible: <code>/api/latest</code> y <code>/api/history?hoursBack=168&stepMinutes=60</code></p>
+    </section>
+  </main>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>

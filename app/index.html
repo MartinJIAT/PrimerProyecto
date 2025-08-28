@@ -1,57 +1,72 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="light">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Panel IoT - DHT22</title>
-  <link rel="stylesheet" href="styles.css" />
-  <script defer src="script.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Panel IoT DHT22 - ESP32</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script defer src="main.js"></script>
 </head>
 <body>
-  <!-- Barra de navegación -->
+  <!-- Navbar -->
   <nav class="navbar">
-    <img src="https://www.nintenderos.com/wp-content/uploads/2023/07/giovanni-Pokemon-GO.jpg" 
-         alt="Logo Giovanni" 
-         class="logo" />
-    <div class="toggle-container">
-      <input type="checkbox" id="themeToggle" />
-      <label for="themeToggle" class="toggle">
-        <span class="icon-sun">☀️</span>
-        <span class="icon-moon">🌙</span>
+    <div class="navbar-left">
+      <img class="logo" alt="Electrónica Gambino" 
+           src="https://media-eze1-2.cdn.whatsapp.net/v/t61.24694-24/468216816_1535772377087712_8395856296496317064_n.jpg?ccb=11-4&oh=01_Q5Aa2QHnmusJ89zGD3qcdcJrhTNdsD16_oxI9SvG6EPlxxnAVw&oe=68AB08BE&_nc_sid=5e03e0&_nc_cat=102">
+      <span class="brand">Panel IoT DHT22 (ESP32 GPIO 2)</span>
+    </div>
+
+    <!-- Toggle tema -->
+    <div class="theme-toggle">
+      <input id="themeSwitch" type="checkbox">
+      <label for="themeSwitch" class="switch">
+        <span class="icon sun">☀️</span>
+        <span class="icon moon">🌙</span>
+        <span class="thumb"></span>
       </label>
     </div>
   </nav>
 
-  <!-- Contenido principal -->
-  <main>
-    <h1>Panel IoT - Sensor DHT22</h1>
-    <div class="card-container">
-      <div class="card">
-        <h2>Temperatura</h2>
-        <p id="tempValue">-- °C</p>
-      </div>
-      <div class="card">
-        <h2>Humedad</h2>
-        <p id="humValue">-- %</p>
-      </div>
+  <!-- Contenido -->
+  <main class="container">
+    <h1>Sensor DHT22</h1>
+    <p class="subtitle">ESP32 • DHT22 conectado al <strong>GPIO 2</strong></p>
+
+    <section class="cards">
+      <article class="card">
+        <div class="card-title">Temperatura</div>
+        <div class="value">
+          <span id="temp">--</span>
+          <span class="unit">°C</span>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-title">Humedad</div>
+        <div class="value">
+          <span id="hum">--</span>
+          <span class="unit">%</span>
+        </div>
+      </article>
+    </section>
+
+    <div class="actions">
+      <button id="btnUpdate" type="button">Actualizar datos</button>
+      <button id="btnClear" type="button" class="ghost">Limpiar datos guardados</button>
     </div>
+
+    <p id="lastUpdate" class="last-update">Última actualización: —</p>
   </main>
 
-  <!-- Script para manejar datos y tema -->
-  <script>
-    // Simulación de datos (aquí conectarías con tu backend o MQTT)
-    setInterval(() => {
-      document.getElementById("tempValue").textContent = (20 + Math.random() * 5).toFixed(1) + " °C";
-      document.getElementById("humValue").textContent = (40 + Math.random() * 10).toFixed(1) + " %";
-    }, 2000);
+  <!-- Botón flotante gráfico -->
+  <button id="btnChart" class="floating-btn" title="Ver gráfico 📊">📊</button>
 
-    // Modo oscuro / claro
-    const themeToggle = document.getElementById("themeToggle");
-    themeToggle.addEventListener("change", () => {
-      document.body.classList.toggle("dark", themeToggle.checked);
-    });
-  </script>
+  <footer class="footer">
+    <small>Todos los datos se guardan en tu navegador con <code>localStorage</code>.</small>
+  </footer>
 </body>
 </html>
-
-
