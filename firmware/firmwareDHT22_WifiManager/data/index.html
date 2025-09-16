@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 - Monitor de Clima</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <img src="https://i.ibb.co/6y40gD3/logo-esp32.png" alt="Logo ESP32">
+        </div>
+        <div class="theme-toggle">
+            <input type="checkbox" id="theme-toggle-checkbox">
+            <label for="theme-toggle-checkbox" class="toggle-label">
+                <span class="sun-icon">☀️</span>
+                <span class="moon-icon">🌙</span>
+            </label>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="widget">
+            <h3>Temperatura</h3>
+            <p id="temp-value">-- °C</p>
+            <div class="icon-container">
+                <span class="chart-icon" onclick="openHistoryPopup('temperatura')">
+                    <img src="https://img.icons8.com/material-outlined/24/000000/line-chart.png" alt="Gráfico">
+                </span>
+            </div>
+        </div>
+        <div class="widget">
+            <h3>Humedad</h3>
+            <p id="hum-value">-- %</p>
+            <div class="icon-container">
+                <span class="chart-icon" onclick="openHistoryPopup('humedad')">
+                    <img src="https://img.icons8.com/material-outlined/24/000000/line-chart.png" alt="Gráfico">
+                </span>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        Hecho por <a href="https://github.com/MartinJIAT/PrimerProyecto" target="_blank">Giovanni</a>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="app.js"></script>
+</body>
+</html>
