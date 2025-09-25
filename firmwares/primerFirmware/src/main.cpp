@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "DHT.h" //Se declara libreria dHT
+#include <DHT.h> //Se declara libreria dHT
 
 #define DHTPIN 2  //Defino el GPIO 2
 

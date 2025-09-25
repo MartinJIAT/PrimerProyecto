@@ -8,9 +8,10 @@
 #include <SPIFFS.h>
 #include <time.h>
 #include <DHT.h>
+#include <HTTPClient.h>
 
 // ====== CONFIGURACIÓN HARDWARE ======
-#define DHTPIN 4 // GPIO para el DHT22
+#define DHTPIN 4      // GPIO para el DHT22
 #define DHTTYPE DHT22 // Tipo de sensor
 DHT dht(DHTPIN, DHTTYPE);
 
@@ -18,39 +19,40 @@ DHT dht(DHTPIN, DHTTYPE);
 WebServer server(80);
 
 // ====== VARIABLES GLOBALES ======
-String apSuffix; // últimos 4 dígitos del MAC
-String apName; // SSID del AP en WiFiManager
-String mdnsName; // nombre mDNS: <mdnsName>.local
-
+String apSuffix;   // últimos dígitos del MAC
+String apName;     // SSID del AP en WiFiManager
+String mdnsName;   // nombre mDNS: <mdnsName>.local
 float currentTemp = NAN;
 float currentHum = NAN;
 
+// ====== CONFIGURACIÓN GOOGLE SHEETS ======
+const char* googleScriptURL = "https://script.google.com/macros/s/AKfycbzWphbim0zWUsFUjIM9X-1GdNkVObZN8qPPy0jY_UBYGOSIMc_nOiRqoAnUQZFI1HvFuw/exec";
+const char* deviceId = "ESP32_01"; // ID único del dispositivo
+
 // ====== NTP (hora para logs) ======
 const char* ntpServer = "pool.ntp.org";
-const long gmtOffset_sec = 0; // ajusta si quieres hora local por firmware
+const long gmtOffset_sec = 0; // ajusta según tu zona horaria
 const int daylightOffset_sec = 0;
 
 // ====== UTILIDADES ======
-String macSuffix(){
+String macSuffix() {
   uint8_t mac[6];
   WiFi.macAddress(mac);
-  char buf[5];
-  snprintf(buf, sizeof(buf), "%02X%02X", mac[4], mac[5]);
+  char buf[7];
+  snprintf(buf, sizeof(buf), "%02X%02X%02X", mac[3], mac[4], mac[5]);
   return String(buf);
 }
 
-bool ensureFS(){
-  if(!SPIFFS.begin(true)){
+bool ensureFS() {
+  if (!SPIFFS.begin(true)) {
     Serial.println(F("[SPIFFS] Falló el montaje"));
     return false;
   }
   return true;
 }
 
-void handleFile(String path){
-  if (path.endsWith("/")) {
-    path += "index.html";
-  }
+void handleFile(String path) {
+  if (path.endsWith("/")) path += "index.html";
 
   if (SPIFFS.exists(path)) {
     File file = SPIFFS.open(path, "r");
@@ -69,16 +71,70 @@ void handleFile(String path){
   }
 }
 
+// ====== ENVIAR DATOS A GOOGLE SHEETS (Hoja: Datos) ======
+void sendToGoogleSheets(float temp, float hum) {
+  if (WiFi.status() == WL_CONNECTED) {
+    HTTPClient http;
+    http.begin(googleScriptURL);
+    http.addHeader("Content-Type", "application/json");
+
+    String mac = macSuffix();
+    String jsonData = "{";
+    jsonData += "\"type\":\"Datos\",";
+    jsonData += "\"deviceId\":\"" + String(deviceId) + "\",";
+    jsonData += "\"mac\":\"" + mac + "\",";
+    jsonData += "\"temp\":" + String(temp, 2) + ",";
+    jsonData += "\"hum\":" + String(hum, 2);
+    jsonData += "}";
+
+    int httpResponseCode = http.POST(jsonData);
+
+    if (httpResponseCode > 0) {
+      Serial.printf("Datos enviados! Código: %d\n", httpResponseCode);
+    } else {
+      Serial.printf("Error enviando datos: %d\n", httpResponseCode);
+    }
+    http.end();
+  }
+}
+
+// ====== ENVIAR EVENTOS A GOOGLE SHEETS (Hoja: Estados) ======
+void sendEvent(String evento, String motivo) {
+  if (WiFi.status() == WL_CONNECTED) {
+    HTTPClient http;
+    http.begin(googleScriptURL);
+    http.addHeader("Content-Type", "application/json");
+
+    String mac = macSuffix();
+    float chipTemp = temperatureRead(); // temperatura interna del chip
+
+    String jsonData = "{";
+    jsonData += "\"type\":\"Estados\",";
+    jsonData += "\"deviceId\":\"" + String(deviceId) + "\",";
+    jsonData += "\"mac\":\"" + mac + "\",";
+    jsonData += "\"evento\":\"" + evento + "\",";
+    jsonData += "\"motivo\":\"" + motivo + "\",";
+    jsonData += "\"tempChip\":" + String(chipTemp, 2);
+    jsonData += "}";
+
+    int httpResponseCode = http.POST(jsonData);
+
+    if (httpResponseCode > 0) {
+      Serial.printf("Evento enviado! Código: %d\n", httpResponseCode);
+    } else {
+      Serial.printf("Error enviando evento: %d\n", httpResponseCode);
+    }
+    http.end();
+  }
+}
+
 // ====== SETUP ======
 void setup() {
   Serial.begin(115200);
-  Serial.println();
   Serial.println(F("Iniciando..."));
 
   // Inicia SPIFFS
-  if (!ensureFS()) {
-    return;
-  }
+  if (!ensureFS()) return;
 
   // Configurar WiFi con WiFiManager
   WiFiManager wm;
@@ -107,14 +163,15 @@ void setup() {
   // Iniciar DHT
   dht.begin();
 
+  // Registrar evento de reinicio
+  sendEvent("Reinicio", "Encendido o Reset manual");
+
   // ====== Rutas HTTP ======
-  // Ruta para los datos del sensor
   server.on("/api/latest", HTTP_GET, []() {
     if (isnan(currentTemp) || isnan(currentHum)) {
       server.send(500, "application/json", "{\"error\":\"Error leyendo DHT22\"}");
       return;
     }
-
     String payload = "{";
     payload += "\"temp\":" + String(currentTemp, 1) + ",";
     payload += "\"hum\":" + String(currentHum, 1);
@@ -122,7 +179,6 @@ void setup() {
     server.send(200, "application/json", payload);
   });
 
-  // Ruta para el historial de datos
   server.on("/api/history", HTTP_GET, []() {
     File file = SPIFFS.open("/data.csv", "r");
     if (!file) {
@@ -133,7 +189,6 @@ void setup() {
     file.close();
   });
 
-  // Manejar todas las demás peticiones como archivos estáticos
   server.onNotFound([]() {
     handleFile(server.uri());
   });
@@ -146,42 +201,44 @@ void setup() {
 void loop() {
   server.handleClient();
 
+  // Leer sensores cada 10s
   static unsigned long lastSensorReadTime = 0;
-  const unsigned long readInterval = 10000; // 10 segundos en milisegundos
+  const unsigned long readInterval = 3000;
 
   if (millis() - lastSensorReadTime > readInterval) {
     lastSensorReadTime = millis();
     currentHum = dht.readHumidity();
     currentTemp = dht.readTemperature();
-    
+
     if (isnan(currentHum) || isnan(currentTemp)) {
-      Serial.println("Failed to read from DHT sensor!");
+      Serial.println("Error leyendo DHT22!");
     } else {
-      Serial.print("Current Temp: ");
-      Serial.println(currentTemp);
-      Serial.print("Current Hum: ");
-      Serial.println(currentHum);
+      Serial.printf("Temp: %.2f °C | Hum: %.2f %%\n", currentTemp, currentHum);
     }
   }
 
+  // Guardar en CSV y enviar a Google Sheets cada 5 min
   static unsigned long lastLogTime = 0;
-  const unsigned long logInterval = 300000; // 5 minutos en milisegundos
+  const unsigned long logInterval = 10000;
 
   if (millis() - lastLogTime > logInterval) {
     lastLogTime = millis();
     if (!isnan(currentHum) && !isnan(currentTemp)) {
+      // Guardar en SPIFFS
       File file = SPIFFS.open("/data.csv", FILE_APPEND);
-      if (!file) {
-        Serial.println("Failed to open file for appending");
-        return;
+      if (file) {
+        time_t now = time(nullptr);
+        file.printf("%ld,%.2f,%.2f\n", now, currentTemp, currentHum);
+        file.close();
+        Serial.println("Datos guardados en CSV!");
       }
-      
-      time_t now = time(nullptr);
-      char buffer[50];
-      sprintf(buffer, "%ld,%.2f,%.2f\n", now, currentTemp, currentHum);
-      file.print(buffer);
-      file.close();
-      Serial.println("Data logged successfully!");
+      // Enviar a Google Sheets (Hoja Datos)
+      sendToGoogleSheets(currentTemp, currentHum);
     }
+  }
+
+  // Ejemplo: evento si chip sobrecalentado (>70 °C)
+  if (temperatureRead() > 70) {
+    sendEvent("Alerta", "Chip sobrecalentado");
   }
 }
